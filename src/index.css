@@ -1,0 +1,77 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body{
+  background-image: url('/public/bg1.jpg');
+  min-height: 100vh;
+  background-attachment: fixed;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+
+.hero2 {
+  position: relative;
+  background-image: url('./components/Hero2/bg1.jpg');
+  min-height: 100vh;
+  width: 100%;
+  background-attachment: fixed;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Overlay (only darkens background, not text) */
+.hero2::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5); /* adjust darkness (0.5 = 50%) */
+  z-index: 1;
+}
+
+/* Text container inside hero */
+.hero2 .content {
+  position: relative;
+  z-index: 2; /* makes sure text is above overlay */
+  color: white;
+  text-align: center;
+}
+.applybg{
+  background-image: url('./pages/ApplyNow/apply2.jpg');
+   min-height: 100vh;
+  width: 100%;
+  background-attachment: fixed;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.applybg::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5); /* adjust darkness (0.5 = 50%) */
+  z-index: 1;
+}
+
+.applybg h1, .p{
+   position: relative;
+  z-index: 2; /* makes sure text is above overlay */
+  color: white;
+  text-align: center;
+}
