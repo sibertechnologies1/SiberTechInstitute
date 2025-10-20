@@ -299,7 +299,7 @@ const ApplyNow = () => {
     }
 
     try {
-      const response = await fetch("http://localhost/register/apply_register.php", {
+      const response = await fetch("https://sibertechsinstitute.great-site.net/apply_register.php", {
         method: "POST",
         body: formDataToSend,
       });

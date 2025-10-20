@@ -50,7 +50,7 @@ function ContactUs() {
           </div>
           <div>
             <h4 className="font-semibold">Email Address</h4>
-            <p className="text-lg">info@sibertechs.edu</p>
+            <p className="text-lg">sibertechs@gmail.com</p>
           </div>
           <div>
             <h4 className="font-semibold">Street Address</h4>
