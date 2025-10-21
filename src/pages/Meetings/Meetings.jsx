@@ -161,7 +161,7 @@ const Meetings = () => {
       // debug log (browser console)
       // console.log("Sending:", payload);
 
-      const res = await fetch("https://sibertechsinstitute.great-site.net/register.php", {
+      const res = await fetch("https://sibertechsinstitute.great-site.net/apply_register.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
