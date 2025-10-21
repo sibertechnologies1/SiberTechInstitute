@@ -236,17 +236,17 @@ const ApplyNow = () => {
 
     if (step === 2) {
       const electiveSubjects = ELECTIVE_SUBJECTS[formData.shsProgram] || [];
-      const selectedElectiveGrades = Object.values(formData.electiveGrades);
-      if (
-        selectedElectiveGrades.length === 0 ||
-        selectedElectiveGrades.length < electiveSubjects.length
-      ) {
-        setFeedback({
-          type: "error",
-          message: "⚠️ Please select grades for all elective subjects.",
-        });
-        return;
+      // Validate all elective subjects have grades selected
+      for (const subject of electiveSubjects) {
+        if (!formData.electiveGrades[subject]) {
+          setFeedback({
+            type: "error",
+            message: `⚠️ Please select a grade for elective subject: ${subject}.`,
+          });
+          return;
+        }
       }
+
       if (!formData.certificate) {
         setFeedback({
           type: "error",
@@ -276,100 +276,97 @@ const ApplyNow = () => {
 
   const [showPreview, setShowPreview] = useState(false);
 
-
   const prevStep = () => setStep((prev) => prev - 1);
 
- const handleSubmit = async (e) => {
-  e.preventDefault();
-  setLoading(true);
-  setFeedback(null);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setFeedback(null);
 
-  try {
-    const formDataToSend = new FormData();
-
-    // ✅ Explicitly append fields (so all match PHP)
-    formDataToSend.append("fullname", formData.fullname);
-    formDataToSend.append("email", formData.email);
-    formDataToSend.append("phone", formData.phone);
-    formDataToSend.append("program", formData.shsProgram); // PHP expects a 'program' field too
-    formDataToSend.append("shsProgram", formData.shsProgram);
-    formDataToSend.append("dob", formData.dob);
-    formDataToSend.append("gender", formData.gender);
-    formDataToSend.append("nationality", formData.nationality);
-    formDataToSend.append("address", formData.address);
-    formDataToSend.append("lastSchool", formData.lastSchool);
-    formDataToSend.append("graduationYear", formData.graduationYear);
-    formDataToSend.append("enrollmentTerm", formData.enrollmentTerm);
-    formDataToSend.append("emergencyContact", formData.emergencyContact);
-    formDataToSend.append("extracurriculars", formData.extracurriculars || "");
-    formDataToSend.append("coreGrades", JSON.stringify(formData.coreGrades));
-    formDataToSend.append("electiveGrades", JSON.stringify(formData.electiveGrades));
-    formDataToSend.append("consent", formData.consent ? "Yes" : "No");
-
-    if (formData.certificate) {
-      formDataToSend.append("certificate", formData.certificate);
-    }
-    if (formData.passport) {
-      formDataToSend.append("passport", formData.passport);
-    }
-
-    const response = await fetch("https://sibertechsinstitute.great-site.net/apply_register.php", {
-      method: "POST",
-      body: formDataToSend,
-    });
-
-    const text = await response.text();
-    console.log("Raw server response:", text);
-
-    let result;
     try {
-      result = JSON.parse(text);
-    } catch {
-      throw new Error("Invalid server response: " + text);
-    }
+      const formDataToSend = new FormData();
 
-    if (result.success) {
-      setFeedback({ type: "success", message: "✅ Application submitted successfully! Check your email." });
+      formDataToSend.append("fullname", formData.fullname);
+      formDataToSend.append("email", formData.email);
+      formDataToSend.append("phone", formData.phone);
+      formDataToSend.append("program", formData.shsProgram);
+      formDataToSend.append("shsProgram", formData.shsProgram);
+      formDataToSend.append("dob", formData.dob);
+      formDataToSend.append("gender", formData.gender);
+      formDataToSend.append("nationality", formData.nationality);
+      formDataToSend.append("address", formData.address);
+      formDataToSend.append("lastSchool", formData.lastSchool);
+      formDataToSend.append("graduationYear", formData.graduationYear);
+      formDataToSend.append("enrollmentTerm", formData.enrollmentTerm);
+      formDataToSend.append("emergencyContact", formData.emergencyContact);
+      formDataToSend.append("extracurriculars", formData.extracurriculars || "");
+      formDataToSend.append("coreGrades", JSON.stringify(formData.coreGrades));
+      formDataToSend.append("electiveGrades", JSON.stringify(formData.electiveGrades));
+      formDataToSend.append("consent", formData.consent ? "Yes" : "No");
 
-      // Reset form after success
-      setFormData({
-        fullname: "",
-        dob: "",
-        gender: "",
-        nationality: "",
-        address: "",
-        email: "",
-        phone: "",
-        shsProgram: "",
-        lastSchool: "",
-        graduationYear: "",
-        enrollmentTerm: "",
-        emergencyContact: "",
-        extracurriculars: "",
-        certificate: null,
-        passport: null,
-        consent: false,
-        coreGrades: {},
-        electiveGrades: {},
+      if (formData.certificate) {
+        formDataToSend.append("certificate", formData.certificate);
+      }
+      if (formData.passport) {
+        formDataToSend.append("passport", formData.passport);
+      }
+
+      const response = await fetch("https://sibertechsinstitute.great-site.net/apply_register.php", {
+        method: "POST",
+        body: formDataToSend,
       });
-      setStep(1);
-    } else {
+
+      const text = await response.text();
+      console.log("Raw server response:", text);
+
+      let result;
+      try {
+        result = JSON.parse(text);
+      } catch {
+        throw new Error("Invalid server response: " + text);
+      }
+
+      if (result.success) {
+        setFeedback({ type: "success", message: "✅ Application submitted successfully! Check your email." });
+
+        setFormData({
+          fullname: "",
+          dob: "",
+          gender: "",
+          nationality: "",
+          address: "",
+          email: "",
+          phone: "",
+          shsProgram: "",
+          lastSchool: "",
+          graduationYear: "",
+          enrollmentTerm: "",
+          emergencyContact: "",
+          extracurriculars: "",
+          certificate: null,
+          passport: null,
+          consent: false,
+          coreGrades: {},
+          electiveGrades: {},
+        });
+        setStep(1);
+        setShowPreview(false);
+      } else {
+        setFeedback({
+          type: "error",
+          message: result.message || "❌ Submission failed. Please check your info and try again.",
+        });
+      }
+    } catch (error) {
+      console.error("Error submitting form:", error);
       setFeedback({
         type: "error",
-        message: result.message || "❌ Submission failed. Please check your info and try again.",
+        message: "⚠️ Server error. Please try again later or contact [sibertechs@gmail.com](mailto:sibertechs@gmail.com).",
       });
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    console.error("Error submitting form:", error);
-    setFeedback({
-      type: "error",
-      message: "⚠️ Server error. Please try again later or contact sibertechs@gmail.com.",
-    });
-  } finally {
-    setLoading(false);
-  }
-};
-
+  };
 
   return (
     <div className="bg-gray-600/30 min-h-screen">
@@ -378,14 +375,14 @@ const ApplyNow = () => {
 
       <div className="relative  text-white text-center py-24 mt-20 applybg">
         <div className="content">
-            <motion.h1
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7 }}
-          className="text-4xl md:text-5xl font-extrabold uppercase"
-        >
-          Apply for Admission
-        </motion.h1>
+          <motion.h1
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7 }}
+            className="text-4xl md:text-5xl font-extrabold uppercase"
+          >
+            Apply for Admission
+          </motion.h1>
         </div>
         <p className="mt-4 max-w-2xl mx-auto text-lg text-white/90 p">
           Start your academic journey with <strong>Siber Techs Institute</strong>.
@@ -400,7 +397,6 @@ const ApplyNow = () => {
           className="bg-white  shadow-2xl w-full max-w-4xl p-10 border border-gray-100"
         >
           <form onSubmit={handleSubmit}>
-
             {/* Progress Tracker */}
             <div className="flex justify-between items-center mb-10 relative">
               {["Personal Info & Grades", "Upload Certificate & Passport", "Review & Submit"].map((label, index) => (
@@ -435,7 +431,6 @@ const ApplyNow = () => {
                   <FaUserGraduate /> Step 1: Personal Info & SHS Grades
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
                   {/* Personal info fields */}
                   <input
                     type="text"
@@ -724,54 +719,52 @@ const ApplyNow = () => {
             )}
 
             {/* Navigation Buttons */}
-            {/* Navigation Buttons */}
-<div className="flex justify-between items-center mt-10">
-  {step > 1 && (
-    <button
-      type="button"
-      onClick={prevStep}
-      className="flex items-center gap-2 text-[#007bff] font-semibold hover:underline"
-    >
-      <FaArrowLeft /> Back
-    </button>
-  )}
+            <div className="flex justify-between items-center mt-10">
+              {step > 1 && (
+                <button
+                  type="button"
+                  onClick={prevStep}
+                  className="flex items-center gap-2 text-[#007bff] font-semibold hover:underline"
+                >
+                  <FaArrowLeft /> Back
+                </button>
+              )}
 
-  {step < 3 ? (
-    <button
-      type="button"
-      onClick={nextStep}
-      className="ml-auto flex items-center gap-2 bg-[#007bff] text-white px-6 py-2 rounded-lg hover:bg-[#0056b3] transition-all"
-    >
-      Next <FaArrowRight />
-    </button>
-  ) : (
-    <>
-      {!showPreview ? (
-        <button
-          type="button"
-          onClick={() => setShowPreview(true)}
-          disabled={loading}
-          className={`ml-auto flex items-center gap-2 bg-[#007bff] text-white px-6 py-2 rounded-lg hover:bg-[#0056b3] transition-all ${
-            loading ? "opacity-70 cursor-not-allowed" : ""
-          }`}
-        >
-          {loading ? "Processing..." : "Preview Application"}
-        </button>
-      ) : (
-        <button
-          type="submit"
-          disabled={loading}
-          className={`ml-auto flex items-center gap-2 bg-[#28a745] text-white px-6 py-2 rounded-lg hover:bg-[#1e7e34] transition-all ${
-            loading ? "opacity-70 cursor-not-allowed" : ""
-          }`}
-        >
-          {loading ? "Submitting..." : "Confirm & Submit"}
-        </button>
-      )}
-    </>
-  )}
-</div>
-
+              {step < 3 ? (
+                <button
+                  type="button"
+                  onClick={nextStep}
+                  className="ml-auto flex items-center gap-2 bg-[#007bff] text-white px-6 py-2 rounded-lg hover:bg-[#0056b3] transition-all"
+                >
+                  Next <FaArrowRight />
+                </button>
+              ) : (
+                <>
+                  {!showPreview ? (
+                    <button
+                      type="button"
+                      onClick={() => setShowPreview(true)}
+                      disabled={loading}
+                      className={`ml-auto flex items-center gap-2 bg-[#007bff] text-white px-6 py-2 rounded-lg hover:bg-[#0056b3] transition-all ${
+                        loading ? "opacity-70 cursor-not-allowed" : ""
+                      }`}
+                    >
+                      {loading ? "Processing..." : "Preview Application"}
+                    </button>
+                  ) : (
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className={`ml-auto flex items-center gap-2 bg-[#28a745] text-white px-6 py-2 rounded-lg hover:bg-[#1e7e34] transition-all ${
+                        loading ? "opacity-70 cursor-not-allowed" : ""
+                      }`}
+                    >
+                      {loading ? "Submitting..." : "Confirm & Submit"}
+                    </button>
+                  )}
+                </>
+              )}
+            </div>
           </form>
         </motion.div>
       </div>
