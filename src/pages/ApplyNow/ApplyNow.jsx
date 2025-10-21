@@ -279,63 +279,97 @@ const ApplyNow = () => {
 
   const prevStep = () => setStep((prev) => prev - 1);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setFeedback(null);
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+  setFeedback(null);
 
+  try {
     const formDataToSend = new FormData();
-    for (const key in formData) {
-      if (key === "coreGrades" || key === "electiveGrades") {
-        formDataToSend.append(key, JSON.stringify(formData[key]));
-      } else if (
-        (key === "certificate" || key === "passport") &&
-        formData[key]
-      ) {
-        formDataToSend.append(key, formData[key]);
-      } else {
-        formDataToSend.append(key, formData[key]);
-      }
+
+    // ✅ Explicitly append fields (so all match PHP)
+    formDataToSend.append("fullname", formData.fullname);
+    formDataToSend.append("email", formData.email);
+    formDataToSend.append("phone", formData.phone);
+    formDataToSend.append("program", formData.shsProgram); // PHP expects a 'program' field too
+    formDataToSend.append("shsProgram", formData.shsProgram);
+    formDataToSend.append("dob", formData.dob);
+    formDataToSend.append("gender", formData.gender);
+    formDataToSend.append("nationality", formData.nationality);
+    formDataToSend.append("address", formData.address);
+    formDataToSend.append("lastSchool", formData.lastSchool);
+    formDataToSend.append("graduationYear", formData.graduationYear);
+    formDataToSend.append("enrollmentTerm", formData.enrollmentTerm);
+    formDataToSend.append("emergencyContact", formData.emergencyContact);
+    formDataToSend.append("extracurriculars", formData.extracurriculars || "");
+    formDataToSend.append("coreGrades", JSON.stringify(formData.coreGrades));
+    formDataToSend.append("electiveGrades", JSON.stringify(formData.electiveGrades));
+    formDataToSend.append("consent", formData.consent ? "Yes" : "No");
+
+    if (formData.certificate) {
+      formDataToSend.append("certificate", formData.certificate);
+    }
+    if (formData.passport) {
+      formDataToSend.append("passport", formData.passport);
     }
 
+    const response = await fetch("https://sibertechsinstitute.great-site.net/apply_register.php", {
+      method: "POST",
+      body: formDataToSend,
+    });
+
+    const text = await response.text();
+    console.log("Raw server response:", text);
+
+    let result;
     try {
-      const response = await fetch("https://sibertechsinstitute.great-site.net/apply_register.php", {
-        method: "POST",
-        body: formDataToSend,
-      });
-      const result = await response.json();
-      if (result.success) {
-        setFeedback({ type: "success", message: "✅ Application submitted successfully!" });
-        setFormData({
-          fullname: "",
-          dob: "",
-          gender: "",
-          nationality: "",
-          address: "",
-          email: "",
-          phone: "",
-          shsProgram: "",
-          lastSchool: "",
-          graduationYear: "",
-          enrollmentTerm: "",
-          emergencyContact: "",
-          extracurriculars: "",
-          certificate: null,
-          passport: null,
-          consent: false,
-          coreGrades: {},
-          electiveGrades: {},
-        });
-        setStep(1);
-      } else {
-        setFeedback({ type: "error", message: result.message || "❌ Submission failed." });
-      }
-    } catch (error) {
-      console.error(error);
-      setFeedback({ type: "error", message: "⚠️ Something went wrong. Please try again." });
+      result = JSON.parse(text);
+    } catch {
+      throw new Error("Invalid server response: " + text);
     }
+
+    if (result.success) {
+      setFeedback({ type: "success", message: "✅ Application submitted successfully! Check your email." });
+
+      // Reset form after success
+      setFormData({
+        fullname: "",
+        dob: "",
+        gender: "",
+        nationality: "",
+        address: "",
+        email: "",
+        phone: "",
+        shsProgram: "",
+        lastSchool: "",
+        graduationYear: "",
+        enrollmentTerm: "",
+        emergencyContact: "",
+        extracurriculars: "",
+        certificate: null,
+        passport: null,
+        consent: false,
+        coreGrades: {},
+        electiveGrades: {},
+      });
+      setStep(1);
+    } else {
+      setFeedback({
+        type: "error",
+        message: result.message || "❌ Submission failed. Please check your info and try again.",
+      });
+    }
+  } catch (error) {
+    console.error("Error submitting form:", error);
+    setFeedback({
+      type: "error",
+      message: "⚠️ Server error. Please try again later or contact sibertechs@gmail.com.",
+    });
+  } finally {
     setLoading(false);
-  };
+  }
+};
+
 
   return (
     <div className="bg-gray-600/30 min-h-screen">
