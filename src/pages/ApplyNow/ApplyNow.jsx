@@ -278,6 +278,41 @@ const ApplyNow = () => {
 
   const prevStep = () => setStep((prev) => prev - 1);
 
+
+async function handleSubmit(event) {
+  event.preventDefault();
+
+  // ✅ Step 1: Check if the backend is online
+  const isServerOnline = await checkServerStatus();
+
+  if (!isServerOnline) {
+    alert("⚠️ The server is currently unreachable. Please try again later.");
+    return;
+  }
+
+  // ✅ Step 2: Continue to send your form data
+  const formDataToSend = new FormData(event.target);
+
+  try {
+    const response = await fetch("https://sibertechsinstitute.great-site.net/register/apply_register.php", {
+      method: "POST",
+      body: formDataToSend,
+    });
+
+    const result = await response.json();
+    if (result.success) {
+      alert("✅ " + result.message);
+    } else {
+      alert("⚠️ " + result.message);
+    }
+  } catch (error) {
+    alert("❌ Something went wrong: " + error.message);
+  }
+}
+
+
+
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
