@@ -396,7 +396,7 @@ const ApplyNow = () => {
           transition={{ duration: 0.8 }}
           className="bg-white  shadow-2xl w-full max-w-4xl p-10 border border-gray-100"
         >
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} method="POST">
             {/* Progress Tracker */}
             <div className="flex justify-between items-center mb-10 relative">
               {["Personal Info & Grades", "Upload Certificate & Passport", "Review & Submit"].map((label, index) => (
