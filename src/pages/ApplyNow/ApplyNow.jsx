@@ -311,7 +311,7 @@ const ApplyNow = () => {
         formDataToSend.append("passport", formData.passport);
       }
 
-      const response = await fetch("https://sibertechsinstitute.great-site.net/apply_register.php", {
+      const response = await fetch("https://sibertechsinstitute.great-site.net/register/apply_register.php", {
         method: "POST",
         body: formDataToSend,
       });
